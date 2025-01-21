@@ -2,6 +2,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Create .env file in root and add the Clerk API Keys
+
 First, run the development server:
 
 ```bash
