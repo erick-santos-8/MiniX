@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { error } from "console";
 
 export async function syncUser() {
   try {
@@ -55,4 +56,14 @@ export async function getUserByClerkId(clerkId: string) {
       },
     },
   })
+}
+
+export async function getDbUserId() {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) throw new Error("Sem autorização")
+
+  const user = await getUserByClerkId(clerkId);
+
+  if (!user) throw new Error("Usuário não encontrado!");
+  return user.id;
 }
