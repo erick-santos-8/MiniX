@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { error } from "console";
+import { revalidatePath } from "next/cache";
 
 export async function syncUser() {
   try {
@@ -154,6 +155,7 @@ export async function toggleFollow(targetUserId: string) {
         })
       ])
     }
+    revalidatePath('/');
     return { success: true }
 
   } catch (error) {
