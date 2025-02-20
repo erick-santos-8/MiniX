@@ -108,3 +108,56 @@ export async function getRandomUsers() {
     return [];
   }
 }
+
+export async function toggleFollow(targetUserId: string) {
+  try {
+    const userId = await getDbUserId();
+
+    if (userId === targetUserId) throw new Error('Não é permitido seguir a sí mesmo');
+
+    const existingFollow = await prisma.follows.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: userId,
+          followingId: targetUserId
+        }
+      }
+    })
+
+    if (existingFollow) {
+      //Deixar de seguir
+      await prisma.follows.delete({
+        where: {
+          followerId_followingId: {
+            followerId: userId,
+            followingId: targetUserId
+          }
+        }
+      })
+    } else {
+      //Seguir
+      //transaction é all or nothing
+      await prisma.$transaction([
+        prisma.follows.create({
+          data: {
+            followerId: userId,
+            followingId: targetUserId
+          }
+        }),
+
+        prisma.notification.create({
+          data: {
+            type: "FOLLOW",
+            userId: targetUserId, //usuário seguido
+            creatorId: userId //usuário seguindo
+          }
+        })
+      ])
+    }
+    return { success: true }
+
+  } catch (error) {
+    console.log("Erro ao gerenciar os seguidores")
+    return { success: false, error: "Erro ao gerenciar os seguidores" }
+  }
+}
