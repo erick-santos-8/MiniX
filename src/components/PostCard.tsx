@@ -4,6 +4,11 @@ import { createComment, deletePost, getPosts, toggleLike } from '@/actions/post.
 import { useUser } from '@clerk/nextjs';
 import React, { useState } from 'react'
 import toast from 'react-hot-toast';
+import { Card, CardContent } from './ui/card';
+import Link from 'next/link';
+import { Avatar, AvatarImage } from './ui/avatar';
+import {formatDistanceToNow} from 'date-fns'
+import { DeleteAlertDialog } from './DeleteAlertDialog';
 
 type Posts = Awaited<ReturnType<typeof getPosts>>
 type Post = Posts[number]
@@ -66,7 +71,49 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
   }
 
   return (
-    <div>PostCard</div>
+    <Card className='overflow-hidden'>
+      <CardContent className='p-4 sm:p-6'>
+        <div className='space-y-4'>
+          <div className='flex space-x-3 sm:*:space-x-4'>
+            <Link href={`/profile/${post.author.username}`}>
+              <Avatar className='size-8 sm:size-10'>
+                <AvatarImage src={post.author.image ?? "/avatar.png"} />
+              </Avatar>
+            </Link>
+            {/* Cabeçalho e conteudo */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 truncate">
+                  <Link
+                    href={`/profile/${post.author.username}`}
+                    className="font-semibold truncate"
+                  >
+                    {post.author.name}
+                  </Link>
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Link href={`/profile/${post.author.username}`}>@{post.author.username}</Link>
+                    <span>•</span>
+                    <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>
+                  </div>
+                </div>
+                {/* Checagem para ver se o usuário atual é o autor do post*/}
+                {dbUserId === post.author.id && (
+                  <DeleteAlertDialog isDeleting={isDeleting} onDelete={handleDeletePost} />
+                )}
+              </div>
+              <p className="mt-2 text-sm text-foreground break-words">{post.content}</p>
+            </div>
+          </div>
+          {/*Imagem do post*/}
+          {post.image && (
+            <div className='rounded-lg overflow-hidden'>
+              <img src={post.image} alt='Conteúdo' className='w-full h-auto object-cover'/>
+            </div>
+          )}
+        </div>
+
+      </CardContent>
+    </Card>
   )
 }
 
