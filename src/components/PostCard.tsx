@@ -1,14 +1,16 @@
 "use client";
 
 import { createComment, deletePost, getPosts, toggleLike } from '@/actions/post.action';
-import { useUser } from '@clerk/nextjs';
+import { SignInButton, useUser } from '@clerk/nextjs';
 import React, { useState } from 'react'
 import toast from 'react-hot-toast';
 import { Card, CardContent } from './ui/card';
 import Link from 'next/link';
 import { Avatar, AvatarImage } from './ui/avatar';
-import {formatDistanceToNow} from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import { DeleteAlertDialog } from './DeleteAlertDialog';
+import { Button } from './ui/button';
+import { HeartIcon, MessageCircleIcon } from 'lucide-react';
 
 type Posts = Awaited<ReturnType<typeof getPosts>>
 type Post = Posts[number]
@@ -21,6 +23,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [hasLiked, setHasLiked] = useState(post.likes.some((like) => like.userId === dbUserId));
   const [optimisticLikes, setOptimisticLikes] = useState(post._count.likes);
+  const [showComments, setShowComments] = useState(false);
 
   const handleLike = async () => {
     if (isLiking) return;
@@ -107,9 +110,48 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
           {/*Imagem do post*/}
           {post.image && (
             <div className='rounded-lg overflow-hidden'>
-              <img src={post.image} alt='Conteúdo' className='w-full h-auto object-cover'/>
+              <img src={post.image} alt='Conteúdo' className='w-full h-auto object-cover' />
             </div>
           )}
+
+          {/* Botões de like e comentários */}
+          <div className="flex items-center pt-2 space-x-4">
+            {user ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`text-muted-foreground gap-2 ${hasLiked ? "text-red-500 hover:text-red-600" : "hover:text-red-500"
+                  }`}
+                onClick={handleLike}
+              >
+                {hasLiked ? (
+                  <HeartIcon className="size-5 fill-current" />
+                ) : (
+                  <HeartIcon className="size-5" />
+                )}
+                <span>{optimisticLikes}</span>
+              </Button>
+            ) : (
+              <SignInButton mode="modal">
+                <Button variant="ghost" size="sm" className="text-muted-foreground gap-2">
+                  <HeartIcon className="size-5" />
+                  <span>{optimisticLikes}</span>
+                </Button>
+              </SignInButton>
+            )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground gap-2 hover:text-blue-500"
+              onClick={() => setShowComments((prev) => !prev)}
+            >
+              <MessageCircleIcon
+                className={`size-5 ${showComments ? "fill-blue-500 text-blue-500" : ""}`}
+              />
+              <span>{post.comments.length}</span>
+            </Button>
+          </div>
         </div>
 
       </CardContent>
