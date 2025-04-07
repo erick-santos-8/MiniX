@@ -3,7 +3,7 @@
 ![image](https://github.com/user-attachments/assets/411e6847-67b9-4b35-af95-3ff5d6141312)
 
 ### Bibliotecas e technologias utilizadas
-  * Clerk, uploadThings, Shadcn, Prisma, Neon e React-hot-toast * 
+  * Clerk, uploadThings, Shadcn, Prisma, Neon e React-hot-toast
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
